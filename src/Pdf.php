@@ -19,7 +19,9 @@ class Pdf
 
     public $imagick;
 
-    protected $validOutputFormats = ['jpg', 'jpeg', 'png'];
+    protected $validOutputFormats = ['jpg', 'jpeg', 'png', 'png8'];
+
+    protected $customOutputFormatSet = false;
 
     protected $layerMethod = Imagick::LAYERMETHOD_FLATTEN;
 
@@ -56,7 +58,7 @@ class Pdf
         if (! $this->isValidOutputFormat($outputFormat)) {
             throw new InvalidFormat("Format {$outputFormat} is not supported");
         }
-
+        $this->customOutputFormatSet = true;
         $this->outputFormat = $outputFormat;
 
         return $this;
@@ -175,8 +177,12 @@ class Pdf
             $this->imagick->thumbnailImage($this->thumbnailWidth, 0);
         }
 
-        $this->imagick->setFormat($this->determineOutputFormat($pathToImage));
-
+        if($this->customOutputFormatSet) {
+            $this->imagick->setFormat($this->outputFormat);
+        } else {
+            $this->imagick->setFormat($this->determineOutputFormat($pathToImage));
+        }
+        
         return $this->imagick;
     }
 
